@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diagnóstico IAC - Informe Personalizado | CiBUC</title>
+  <!-- Importar fuente Roboto -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    /*==========================================
+      VARIABLES DE COLOR Y TIPOGRAFÍA
+    ==========================================*/
+    :root {
+      --gradient-start: #8F2795; /* Morado oscuro */
+      --gradient-end:   #DD3CB9; /* Rosa vibrante */
+      --primary:        #551A52; /* Texto principal sobre botones / acentos */
+      --secondary:      #CAB7E6; /* Fondo botones/CTA */
+      --text-light:     #FFFFFF; /* Blanco puro */
+      --text-dark:      #212121; /* Gris oscuro */
+      --bg-block:       rgba(255, 255, 255, 0.1); /* Blanco translúcido para bloques */
+      --border-radius:  8px;
+      --font-main:      'Roboto', sans-serif;
+    }
+
+    /*==========================================
+      RESET Y ESTILOS GLOBALES
+    ==========================================*/
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: var(--font-main);
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: var(--text-light);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    h1, h2, h3, h4 {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+    }
+    p, label, ul, li {
+      font-weight: 400;
+      margin-bottom: 1rem;
+      color: var(--text-light);
+    }
+    ul, ol {
+      padding-left: 1.5rem;
+    }
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    /*==========================================
+      HEADER PRINCIPAL
+    ==========================================*/
+    header {
+      text-align: center;
+      padding: 60px 20px;
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+    header p {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+    }
+    header .cta-button {
+      display: inline-block;
+      padding: 15px 30px;
+      background-color: var(--secondary);
+      color: var(--primary);
+      border-radius: var(--border-radius);
+      font-size: 1.2rem;
+      transition: background-color 0.3s ease;
+    }
+    header .cta-button:hover {
+      background-color: rgba(202,183,230, 0.8);
+    }
+
+    /*==========================================
+      CONTENEDOR PRINCIPAL
+    ==========================================*/
+    .wrapper {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /*==========================================
+      BLOQUES DEL WIZARD (PREGUNTAS)
+    ==========================================*/
+    .question-block {
+      background-color: var(--bg-block);
+      border-radius: var(--border-radius);
+      padding: 30px 20px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .question-block.active {
+      display: block;
+    }
+    .question-block h2 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      text-align: center;
+      color: var(--text-light);
+    }
+    .question-block label {
+      display: block;
+      margin: 12px 0;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .question-block input[type="radio"] {
+      margin-right: 8px;
+      accent-color: var(--secondary);
+      transform: scale(1.2);
+      vertical-align: middle;
+    }
+
+    /*==========================================
+      BOTONES DE NAVEGACIÓN (Siguiente / Anterior)
+    ==========================================*/
+    .wizard-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+    .wizard-nav button {
+      background-color: var(--secondary);
+      color: var(--primary);
+      border: none;
+      padding: 12px 25px;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .wizard-nav button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    .wizard-nav button:hover:not(:disabled) {
+      background-color: rgba(202,183,230, 0.8);
+    }
+
+    /*==========================================
+      BLOQUE DE RESULTADOS / INFORME
+    ==========================================*/
+    #resultBox {
+      background-color: var(--bg-block);
+      color: var(--text-light);
+      border-radius: var(--border-radius);
+      padding: 30px 25px;
+      margin-top: 40px;
+      display: none;
+    }
+    #resultBox h2 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--text-light);
+    }
+    /* Cada subsección del informe */
+    .report-section {
+      background-color: var(--bg-block);
+      border-left: 4px solid var(--secondary);
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      padding: 20px 20px 20px 30px;
+      margin-bottom: 25px;
+    }
+    .report-section h3 {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: var(--text-light);
+    }
+    .report-section p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text-light);
+      text-align: justify;
+    }
+    .report-section ul,
+    .report-section ol {
+      margin-left: 25px;
+      margin-bottom: 1rem;
+      color: var(--text-light);
+    }
+    .report-section li {
+      margin-bottom: 0.6rem;
+      text-align: justify;
+    }
+    .report-section ol {
+      list-style-type: decimal;
+    }
+
+    /* Botón de imprimir */
+    .print-button {
+      display: block;
+      margin: 30px auto 0;
+      background-color: var(--secondary);
+      color: var(--primary);
+      padding: 12px 30px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .print-button:hover {
+      background-color: rgba(202,183,230, 0.8);
+    }
+
+    /*==========================================
+      ESTILOS DE IMPRESIÓN
+    ==========================================*/
+    @media print {
+      body {
+        background: #FFFFFF !important;
+        color: #212121 !important;
+        font-size: 11pt;
+        padding: 1in;
+      }
+      header {
+        background: none !important;
+        color: #212121 !important;
+        padding: 0;
+        margin-bottom: 1rem;
+      }
+      header h1, header p {
+        color: #212121 !important;
+        text-align: center;
+      }
+      .wrapper {
+        box-shadow: none !important;
+        margin: 0;
+        padding: 0;
+      }
+      /* Ocultar cuestionario al imprimir */
+      .question-block,
+      .wizard-nav,
+      .print-button {
+        display: none !important;
+      }
+      #resultBox {
+        background: #FFFFFF !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin-top: 0 !important;
+        padding: 0 !important;
+      }
+      .report-section {
+        background: #FFFFFF !important;
+        border: 1px solid #CCC !important;
+        border-left: 3px solid #888 !important;
+        border-radius: 0 !important;
+        padding: 0.75rem !important;
+        margin-bottom: 1rem !important;
+      }
+      .report-section h3 {
+        font-size: 1.2rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+      .report-section p,
+      .report-section ul li {
+        font-size: 10pt !important;
+        line-height: 1.4 !important;
+        color: #212121 !important;
+        text-align: justify;
+      }
+      .report-section ul,
+      .report-section ol {
+        padding-left: 1rem !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!--==========================================
+    HEADER
+  ==========================================-->
+  <header>
+    <h1>🧩 ¿Está tu organización preparada para la Inteligencia Artificial Colectiva?</h1>
+    <p>Responde este breve diagnóstico (2 minutos) y recibe tu informe personalizado con Plan de Acción.</p>
+    <a href="#" class="cta-button">Descargar Informe Completo</a>
+  </header>
+
+  <!--==========================================
+    CONTENEDOR PRINCIPAL
+  ==========================================-->
+  <div class="wrapper">
+
+    <!--==========================================
+      WIZARD: BLOQUES DE PREGUNTA
+    ==========================================-->
+    <form id="iacForm">
+
+      <!-- Pregunta 1 -->
+      <div class="question-block active" data-step="1">
+        <h2>1. ¿Cómo se toman las decisiones clave en tu organización?</h2>
+        <label><input type="radio" name="q1" value="1" required /> Las toma la dirección de forma centralizada</label>
+        <label><input type="radio" name="q1" value="2" /> Se consulta a ciertos mandos o expertos puntuales</label>
+        <label><input type="radio" name="q1" value="3" /> Se lanzan encuestas o grupos de trabajo internos</label>
+        <label><input type="radio" name="q1" value="4" /> Se activan procesos colectivos de escucha y síntesis</label>
+      </div>
+
+      <!-- Pregunta 2 -->
+      <div class="question-block" data-step="2">
+        <h2>2. ¿Qué uso hacéis de los datos en RRHH y estrategia?</h2>
+        <label><input type="radio" name="q2" value="1" required /> Casi ninguno</label>
+        <label><input type="radio" name="q2" value="2" /> Consultas ocasionales a Excel, informes estáticos</label>
+        <label><input type="radio" name="q2" value="3" /> Uso sistemático de dashboards y KPIs</label>
+        <label><input type="radio" name="q2" value="4" /> IA, analítica avanzada e integración con conocimiento humano</label>
+      </div>
+
+      <!-- Pregunta 3 -->
+      <div class="question-block" data-step="3">
+        <h2>3. ¿Cómo se capta el conocimiento de las personas antes de tomar decisiones?</h2>
+        <label><input type="radio" name="q3" value="1" required /> No se capta</label>
+        <label><input type="radio" name="q3" value="2" /> Solo en comités o reuniones internas</label>
+        <label><input type="radio" name="q3" value="3" /> A través de canales de aportación o encuestas</label>
+        <label><input type="radio" name="q3" value="4" /> Con herramientas que transforman la inteligencia colectiva en decisiones claras</label>
+      </div>
+
+      <!-- Pregunta 4 -->
+      <div class="question-block" data-step="4">
+        <h2>4. ¿Qué percepción general hay sobre la IA en tu organización?</h2>
+        <label><input type="radio" name="q4" value="1" required /> Se ve como una amenaza</label>
+        <label><input type="radio" name="q4" value="2" /> Es algo lejano</label>
+        <label><input type="radio" name="q4" value="3" /> Se empieza a explorar su uso</label>
+        <label><input type="radio" name="q4" value="4" /> Se considera un aliado estratégico, especialmente si se usa colectivamente</label>
+      </div>
+
+      <!-- Pregunta 5 -->
+      <div class="question-block" data-step="5">
+        <h2>5. ¿Cómo describirías la cultura de colaboración?</h2>
+        <label><input type="radio" name="q5" value="1" required /> Jerárquica y cerrada</label>
+        <label><input type="radio" name="q5" value="2" /> Colaboración ocasional, depende del área</label>
+        <label><input type="radio" name="q5" value="3" /> Bastante transversal y con iniciativas participativas</label>
+        <label><input type="radio" name="q5" value="4" /> Cultura abierta, orientada al aprendizaje colectivo</label>
+      </div>
+
+      <!-- Pregunta 6 -->
+      <div class="question-block" data-step="6">
+        <h2>6. ¿Qué lugar ocupan las personas en vuestra estrategia de transformación digital?</h2>
+        <label><input type="radio" name="q6" value="1" required /> Las personas no están en el centro</label>
+        <label><input type="radio" name="q6" value="2" /> Son importantes pero poco implicadas</label>
+        <label><input type="radio" name="q6" value="3" /> Se intenta integrarlas progresivamente</label>
+        <label><input type="radio" name="q6" value="4" /> Son el eje vertebrador de toda transformación</label>
+      </div>
+
+      <!-- Controles de Navegación -->
+      <div class="wizard-nav">
+        <button type="button" id="prevBtn" disabled>← Anterior</button>
+        <button type="button" id="nextBtn">Siguiente →</button>
+      </div>
+    </form>
+
+    <!--==========================================
+      BLOQUE DE RESULTADOS / INFORME
+    ==========================================-->
+    <div id="resultBox">
+      <!-- El contenido se genera por JavaScript -->
+      <button class="print-button" onclick="window.print()">🖨️ Imprimir Informe</button>
+    </div>
+
+  </div> <!-- /.wrapper -->
+
+  <script>
+    const form      = document.getElementById("iacForm");
+    const blocks    = document.querySelectorAll(".question-block");
+    const prevBtn   = document.getElementById("prevBtn");
+    const nextBtn   = document.getElementById("nextBtn");
+    const resultBox = document.getElementById("resultBox");
+    let currentStep = 0;
+    const totalSteps = blocks.length;
+
+    // Mostrar solo el bloque activo
+    function showStep(step) {
+      blocks.forEach((blk, idx) => {
+        blk.classList.toggle("active", idx === step);
+      });
+      prevBtn.disabled = (step === 0);
+      nextBtn.textContent = (step === totalSteps - 1) ? "Ver mi resultado" : "Siguiente →";
+    }
+    showStep(currentStep);
+
+    // Avanzar o calcular resultado
+    nextBtn.addEventListener("click", () => {
+      const currentInputs = blocks[currentStep].querySelectorAll('input[type="radio"]');
+      const anyChecked = Array.from(currentInputs).some(i => i.checked);
+      if (!anyChecked) {
+        alert("Por favor, selecciona una opción antes de continuar.");
+        return;
+      }
+      if (currentStep < totalSteps - 1) {
+        currentStep++;
+        showStep(currentStep);
+      } else {
+        calculateResult();
+      }
+    });
+
+    // Retroceder
+    prevBtn.addEventListener("click", () => {
+      if (currentStep > 0) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    });
+
+    // Generar y mostrar el informe final
+    function calculateResult() {
+      const data = new FormData(form);
+      let score = 0;
+      for (let pair of data.entries()) {
+        score += parseInt(pair[1]);
+      }
+
+      // Introducción al informe
+      const introHTML = `
+        <h2>📋 Informe de Diagnóstico IAC</h2>
+        <div class="report-section">
+          <h3>Introducción a la Dirección Inteligente Colectiva (DIC)</h3>
+          <p>En la era digital, las metodologías tradicionales de gestión (planes estratégicos a largo plazo, Balanced Scorecard o enfoques Agile aislados) muestran limitaciones para afrontar la complejidad y velocidad del entorno actual. Surge entonces la <strong>Dirección Inteligente Colectiva (DIC)</strong>, un nuevo estándar directivo que integra tres tipos de inteligencia:</p>
+          <ul>
+            <li><strong>Inteligencia Humana:</strong> experiencia y criterio de líderes y expertos.</li>
+            <li><strong>Inteligencia Colectiva:</strong> diversidad de perspectivas recogida de forma estructurada.</li>
+            <li><strong>Inteligencia Artificial:</strong> capacidad de procesar y sintetizar datos masivos en tiempo real.</li>
+          </ul>
+          <p>La DIC convierte la toma de decisiones en un “cerebro colectivo” que actúa con rapidez, rigor y legitimidad, superando enfoques unilaterales.</p>
+        </div>
+        <div class="report-section">
+          <h3>Metodología del Diagnóstico</h3>
+          <p>Evaluamos dos dimensiones clave:</p>
+          <ul>
+            <li><strong>Madurez Digital:</strong> uso de datos y tecnologías de IA en RRHH.</li>
+            <li><strong>Cultura Colaborativa:</strong> existencia de procesos estructurados de participación y captura de conocimiento.</li>
+          </ul>
+          <p>Según tu puntuación total (<strong>6 a 24</strong>), obtendrás uno de estos perfiles:</p>
+          <ul>
+            <li>🟣 <strong>Desconectados</strong> (6–10 puntos)</li>
+            <li>🟡 <strong>Tradicionales Abiertos</strong> (11–15 puntos)</li>
+            <li>🔴 <strong>Tecnocéntricos</strong> (16–20 puntos)</li>
+            <li>🟢 <strong>Pioneros Colectivos</strong> (21–24 puntos)</li>
+          </ul>
+        </div>
+      `;
+
+      let perfilHTML = "";
+
+      // Perfil “Desconectados”
+      if (score <= 10) {
+        perfilHTML = `
+          <h3 class="perfil-desconectados">🟣 Perfil “Desconectados”</h3>
+          <div class="report-section">
+            <h3>Diagnóstico de la Situación Actual</h3>
+            <p>- Las decisiones de RRHH se toman de manera centralizada, sin consulta amplia.<br>
+            - Apenas se utilizan datos; los informes son aislados y no integrados.<br>
+            - No existen procesos formales para capturar el conocimiento tácito; reside en pocas personas.<br>
+            - La cultura de colaboración es mínima. La IA se percibe como amenaza o algo lejano.</p>
+          </div>
+          <div class="report-section">
+            <h3>Riesgos Principales</h3>
+            <ul>
+              <li><em>Pérdida de talento</em>: sin escuchar el pulso real, la rotación se mantendrá alta.</li>
+              <li><em>Decisiones pobres</em>: basadas en intuiciones sin respaldo de datos.</li>
+              <li><em>Rechazo a la IA</em>: sin confianza, la adopción será traumática.</li>
+              <li><em>Atraso competitivo</em>: otras organizaciones avanzan con colaboración y datos.</li>
+            </ul>
+          </div>
+          <div class="report-section">
+            <h3>Visión Deseada (Objetivo IAC-DIC)</h3>
+            <ul>
+              <li>Implementar encuestas y focus groups periódicos.</li>
+              <li>Capturar lecciones aprendidas y buenas prácticas en un repositorio central.</li>
+              <li>Comunicar el valor de la IA como potenciadora de la voz del equipo.</li>
+            </ul>
+          </div>
+          <div class="report-section">
+            <h3>Plan de Acción Inmediato (0–30 días)</h3>
+            <ol>
+              <li><strong>Lanzar un “Reto IAC Piloto” en RRHH:</strong> “¿Cómo reducir la rotación de personal en 3 meses?”<br>Recoger experiencias y datos a través de Google Forms o similar.</li>
+              <li><strong>Designar un “Embajador DIC” en RRHH:</strong> Persona responsable de coordinar la recolección y comunicación.</li>
+              <li><strong>Comunicar el valor de la IA Colectiva:</strong> Realizar reunión y enviar email explicativo, mostrando que la IA potencia la voz del equipo y no la reemplaza.</li>
+              <li><strong>Medir un KPI inicial:</strong> Número de aportaciones recibidas y encuesta “¿Me siento escuchado?”.</li>
+            </ol>
+          </div>
+        `;
+      }
+      // Perfil “Tradicionales Abiertos”
+      else if (score <= 15) {
+        perfilHTML = `
+          <h3 class="perfil-tradicionales">🟡 Perfil “Tradicionales Abiertos”</h3>
+          <div class="report-section">
+            <h3>Diagnóstico de la Situación Actual</h3>
+            <p>- Ya existen encuestas y focus groups, pero no están vinculados a decisiones estratégicas.<br>
+            - La cultura de colaboración es incipiente, sin canales claros de seguimiento.<br>
+            - Uso básico de People Analytics: dashboards y KPIs, sin enfoque de inteligencia colectiva.<br>
+            - La IA se percibe como curiosidad; hay pilotos aislados sin integración con aportes del equipo.</p>
+          </div>
+          <div class="report-section">
+            <h3>Riesgos Principales</h3>
+            <ul>
+              <li><em>Desalineación</em>: participación sin objetivos claros genera “ruido”.</li>
+              <li><em>Desmotivación</em>: si no se ven resultados, la gente dejará de participar.</li>
+              <li><em>Oportunidades perdidas</em>: no se aprovechan insights clave de clima y retención.</li>
+            </ul>
+          </div>
+          <div class="report-section">
+            <h3>Visión Deseada (Objetivo IAC-DIC)</h3>
+            <ul>
+              <li>Crear un repositorio centralizado de conocimiento (lecciones aprendidas) con etiquetas y clasificación.</li>
+              <li>Implementar un chatbot interno o solución RAG que sintetice aportaciones y datos para generar recomendaciones.</li>
+            </ul>
+          </div>
+          <div class="report-section">
+            <h3>Plan de Acción Inmediato (0–30 días)</h3>
+            <ol>
+              <li><strong>Estandarizar captura de conocimiento:</strong> Definir plantillas para “Lecciones Aprendidas” y nombrar responsables de curación.</li>
+              <li><strong>Implementar MVP de RAG:</strong> Configurar un chatbot/portal con TI para procesar el repositorio y ofrecer respuestas inteligentes.</li>
+              <li><strong>Comunicar y entrenar:</strong> Realizar talleres breves (1–2 horas) para mostrar el repositorio y el chatbot; instruir mandos intermedios en su uso.</li>
+              <li><strong>Medir KPIs de uso:</strong> Número de consultas al chatbot; número de entradas en el repositorio; satisfacción de usuarios con las respuestas.</li>
+            </ol>
+          </div>
+        `;
+      }
+      // Perfil “Tecnocéntricos”
+      else if (score <= 20) {
+        perfilHTML = `
+          <h3 class="perfil-tecnocentricos">🔴 Perfil “Tecnocéntricos”</h3>
+          <div class="report-section">
+            <h3>Diagnóstico de la Situación Actual</h3>
+            <p>- La organización cuenta con dashboards en tiempo real y sistemas avanzados de People Analytics.<br>
+            - Han probado pilotos de IA para selección de personal y análisis de desempeño, pero falta integrar el componente cualitativo de las personas.<br>
+            - La cultura de colaboración está centrada en la tecnología, sin un ciclo formal “escucha → síntesis → acción”.<br>
+            - La IA se percibe como poderosa, pero algunos empleados temen que reemplace labores humanas.</p>
+          </div>
+          <div class="report-section">
+            <h3>Riesgos Principales</h3>
+            <ul>
+              <li><em>Decisiones parciales</em>: basadas solo en datos, sin contexto humano.</li>
+              <li><em>Desvinculación</em>: la percepción de que la IA reemplaza empleos genera resistencia.</li>
+              <li><em>Falta de legitimidad</em>: decisiones sin validación colectiva pierden aceptación.</li>
+            </ul>
+          </div>
+          <div class="report-section">
+            <h3>Visión Deseada (Objetivo IAC-DIC)</h3>
+            <ul>
+              <li>Establecer canales formales (comunidades de práctica, foros, retrospectivas) que alimenten un motor de IA para agrupar temas y generar recomendaciones prioritarias.</li>
+              <li>Definir “retos DIC” en RRHH (e.g. “¿Cómo duplicar el engagement en 6 meses?”) y activar un flujo que combine aportaciones, análisis y priorización automática.</li>
+            </ul>
+          </div>
+          <div class="report-section">
+            <h3>Plan de Acción Inmediato (0–30 días)</h3>
+            <ol>
+              <li><strong>Crear un “Hub DIC de RRHH”:</strong> Espacio (físico o digital) donde publicar retos mensuales, recopilar aportaciones y mostrar avances. Equipo: 1 Data Analyst + 1 HRBP + 1 Comunicación Interna.</li>
+              <li><strong>Configurar pipeline de IAC:</strong> Definir canales de entrada (foros, encuestas, retrospectivas) y un motor de IA (solución RAG) que procese los inputs y genere informes ejecutables.</li>
+              <li><strong>Activar el primer reto estratégico:</strong> “¿Cómo duplicar el engagement de empleados clave en 6 meses?” Incentivar la participación con reconocimientos y publicar resultados quincenales.</li>
+              <li><strong>Medir KPIs 360°:</strong> Número de participantes, proporción de propuestas implementadas, variación de engagement/clima en 3 meses.</li>
+            </ol>
+          </div>
+        `;
+      }
+      // Perfil “Pioneros Colectivos”
+      else {
+        perfilHTML = `
+          <h3 class="perfil-pioneros">🟢 Perfil “Pioneros Colectivos”</h3>
+          <div class="report-section">
+            <h3>Diagnóstico de la Situación Actual</h3>
+            <p>- La organización ya cuenta con plataformas completas de People Analytics y flujos de datos en tiempo real.<br>
+            - Existen comunidades de práctica consolidadas, rutinas de “Retrospectiva” y captura sistemática de lecciones aprendidas.<br>
+            - Se utiliza IA para predicciones clave (rotación, matching de candidatos, análisis de clima).<br>
+            - Cultura de colaboración madura: los empleados participan activamente y ven sus aportes reflejados en acciones concretas.<br>
+            - Los retos DIC se convocan semanalmente y se combinan insights colectivos con dirección estratégica.</p>
+          </div>
+          <div class="report-section">
+            <h3>Riesgos Principales</h3>
+            <ul>
+              <li><em>Estancamiento innovador</em>: al ser muy avanzados, puede disminuir la urgencia de innovar.</li>
+              <li><em>Fatiga colaborativa</em>: exceso de inputs y datos sin filtrar puede saturar a los equipos.</li>
+              <li><em>Sostenibilidad</em>: mantener la cultura y la tecnología requiere gobernanza y presupuesto constantes.</li>
+            </ul>
+          </div>
+          <div class="report-section">
+            <h3>Visión Deseada (Objetivo IAC-DIC)</h3>
+            <ul>
+              <li>Diseñar “Laboratorios DIC” para experimentar con IA avanzada (análisis de sentimiento, talleres VR) en retos de diversidad, bienestar, etc.</li>
+              <li>Implementar un “Scoreboard DIC” en tiempo real: métricas de retos abiertos/cerrados, nivel de participación y KPIs de clima/engagement.</li>
+              <li>Difundir casos de éxito mediante white papers y webinars internos y externos para posicionarse como líderes en DIC.</li>
+            </ul>
+          </div>
+          <div class="report-section">
+            <h3>Plan de Acción Inmediato (0–30 días)</h3>
+            <ol>
+              <li><strong>Lanzar “Laboratorio DIC RRHH”:</strong> Reto sectorial “¿Cómo optimizar la diversidad e inclusión en equipos remotos?” Equipo: RRHH, TI, Legal y Diversidad. Compartir avances diarios en tablero interno.</li>
+              <li><strong>Implementar “Scoreboard DIC”:</strong> Configurar un dashboard con: retos abiertos/cerrados, nivel de participación y métricas de impacto en engagement/rotación, con actualización automática vía API entre sistemas IA y plataformas colaborativas.</li>
+              <li><strong>Documentar y difundir:</strong> Publicar un white paper CiBUC sobre la experiencia DIC en RRHH y organizar un webinar para compartir aprendizajes y atraer talento digital.</li>
+            </ol>
+          </div>
+        `;
+      }
+
+      // Montar todo el contenido del resultado
+      resultBox.innerHTML = `
+        ${introHTML}
+        ${perfilHTML}
+        <button class="print-button" onclick="window.print()">🖨️ Imprimir Informe</button>
+      `;
+      resultBox.style.display = "block";
+      form.style.display = "none";
+      resultBox.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
